@@ -1,0 +1,8 @@
+# Crate data pipeline — Python 3.11+
+psycopg[binary]>=3.1,<4         # Postgres driver (bulk upserts)
+python-dotenv>=1.0              # load .env
+tidalapi>=0.7.6                 # Tidal ingest
+musicbrainzngs>=0.7.1           # MusicBrainz enrichment
+python3-discogs-client>=2.6     # Discogs credits/personnel
+anthropic>=0.39                 # Claude tagging + liner notes
+fastembed>=0.3                  # CPU-only ONNX embeddings (BAAI/bge-large-en-v1.5, 1024-dim)

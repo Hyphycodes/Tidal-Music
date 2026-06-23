@@ -1,0 +1,80 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Design tokens (single source of truth) ───────────────────────────────
+   Warm, unhurried, liner-notes not spreadsheet. One ember accent, used sparingly.
+   Reliable font stacks only — no flaky web-font loads, no layout shift. */
+:root {
+  --base: #100c0a; /* warm near-black */
+  --surface: #17120e;
+  --raised: #1f1813;
+  --bone: #ece3d4; /* warm bone text */
+  --sand: #a7977f; /* muted sand secondary */
+  --faint: #6f6353; /* faint tertiary */
+  --ember: #e0612f; /* the single accent */
+  --hairline: rgba(236, 227, 212, 0.08);
+
+  --font-serif: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+body {
+  background: var(--base);
+  color: var(--bone);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection {
+  background: var(--ember);
+  color: var(--base);
+}
+
+/* focus visibility — quality floor */
+:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* quiet, thin scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--faint) transparent;
+}
+
+/* skeletons — reserve space, never a blank flash or layout shift */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.45;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+.skeleton {
+  background: var(--raised);
+  border-radius: 4px;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
