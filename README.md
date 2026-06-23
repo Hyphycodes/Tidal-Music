@@ -17,21 +17,26 @@ instant and only ever reads local Postgres.
 
 ## Layout
 
+The **Next.js app lives at the repository root** so Vercel deploys it with zero
+config (no "Root Directory" setting needed). The Python pipeline and SQL live in
+sibling folders.
+
 ```
-supabase/migrations/   0001–0007 SQL — schema, indexes, MVs, read-only role
-supabase/README.md     how to apply migrations + the read-only role step
+app/                   Next.js 14 App Router (root) — Vercel
+  api/**               read endpoints + /api/query (text-to-SQL) + lists writes
+  page.tsx, track/, artist/, chat/, lists/   the four screens
+components/, lib/       UI + design system + db/query helpers
+package.json, next.config.mjs, tailwind.config.ts, tsconfig.json
 pipeline/              Python 3.11+ — ingest + enrichment + orchestrator
   ingest, enrich_musicbrainz, enrich_discogs, enrich_claude, embed,
   liner_notes, derive_relationships, observe, run_pipeline
-web/                   Next.js 14 (App Router, TS strict, Tailwind) — Vercel
-  app/api/**           read endpoints + /api/query (text-to-SQL) + lists writes
-  app/, components/    Library, Detail, Chat, Lists screens + design system
+supabase/migrations/   0001–0007 SQL — schema, indexes, MVs, read-only role
 .github/workflows/     nightly.yml — scheduled + on-demand pipeline
 ```
 
-Design + stack details: [`web/PERF.md`](web/PERF.md), [`supabase/README.md`](supabase/README.md).
+Design + stack details: [`PERF.md`](PERF.md), [`supabase/README.md`](supabase/README.md).
 A deviation from PROJECT_CONTEXT §4 (using `postgres` instead of
-`@supabase/supabase-js` for raw SQL) is flagged in `web/PERF.md`.
+`@supabase/supabase-js` for raw SQL) is flagged in `PERF.md`.
 
 ---
 
@@ -64,7 +69,7 @@ Copy `.env.example` → `.env` and fill it in (used by the pipeline locally).
 
 ## 3 · First backfill (run locally, once)
 
-Needs **Python 3.11+** (your machine currently has 3.9 — install 3.11+ first).
+Needs **Python 3.11+** (installed via `brew install python@3.11`).
 `fastembed` downloads a small ONNX model (BAAI/bge-large-en-v1.5, 1024-dim) on
 first run.
 
@@ -90,14 +95,17 @@ psql "$SUPABASE_DB_URL" -c "select kind,body from observations order by created_
 
 ## 4 · Deploy the web app (Vercel)
 
-- Import the repo, **set the project root to `web/`**.
-- Add env vars: `SUPABASE_DB_URL`, `SUPABASE_DB_URL_READONLY`, `SUPABASE_URL`,
-  `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY`.
-  For the on-demand sync button also add `SYNC_SECRET`, `GITHUB_DISPATCH_TOKEN`
-  (fine-grained PAT with Actions: write on this repo), `GITHUB_REPO=Hyphycodes/Tidal-Music`.
-- Build command `next build`, output auto-detected. `postgres` is server-only.
+- Import the repo. **Leave "Root Directory" as the repository root (default)** —
+  the Next app is at the root, so no Root Directory override is needed. (Setting
+  it to `web/` is what caused the original 404; there is no `web/` folder.)
+- Add env vars: `SUPABASE_DB_URL`, `SUPABASE_DB_URL_READONLY`, `ANTHROPIC_API_KEY`.
+  (Optional/for completeness: `SUPABASE_URL`, `SUPABASE_ANON_KEY`,
+  `SUPABASE_SERVICE_ROLE_KEY`.) For the on-demand sync button also add
+  `SYNC_SECRET`, `GITHUB_DISPATCH_TOKEN` (fine-grained PAT with Actions: write on
+  this repo), `GITHUB_REPO=Hyphycodes/Tidal-Music`.
+- Framework auto-detected as Next.js; `postgres` is server-only.
 
-Local dev: `cd web && npm install && npm run dev`.
+Local dev: `npm install && npm run dev` (from the repo root).
 
 ## 5 · Nightly automation (GitHub Actions)
 
